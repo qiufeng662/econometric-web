@@ -1259,11 +1259,7 @@ else:
                         mime="text/csv",
                         key="desc_stats_download"
                     )
-                        label="📊 下载描述性统计 (CSV)",
-                        data=desc_csv,
-                        file_name="描述性统计.csv",
-                        mime="text/csv"
-                    )
+
                     
                     # 回归结果
                     if results['baseline']:
@@ -1276,11 +1272,7 @@ else:
                             mime="text/csv",
                             key="reg_results_download"
                         )
-                            label="📈 下载回归结果 (CSV)",
-                            data=reg_summary.encode('utf-8-sig'),
-                            file_name="回归结果.csv",
-                            mime="text/csv"
-                        )
+
         else:
             with tab7:
                 st.markdown("### 📥 分析报告下载")
