@@ -1196,13 +1196,8 @@ else:
         if st.session_state.get('optimization_results') is not None:
             with tab8:
         else:
-        # Tab 8: 报告下载
-        if st.session_state.get('optimization_results') is not None:
-            with tab8:
-        else:
             with tab7:
-        # Tab 7: 报告下载
-        with tab7:
+            st.markdown("### 📥 分析报告下载")
             st.markdown("### 📥 分析报告下载")
             
             col1, col2 = st.columns(2)
