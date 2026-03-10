@@ -1,0 +1,25 @@
+# 一键实证分析 Web 应用依赖
+# Python 3.9+ 推荐
+
+# Web 框架
+streamlit>=1.28.0
+
+# 数据处理
+pandas>=1.5.0
+numpy>=1.23.0
+
+# 统计分析
+statsmodels>=0.13.0
+scipy>=1.9.0
+
+# 数据可视化
+plotly>=5.15.0
+matplotlib>=3.6.0
+
+# 文件处理
+openpyxl>=3.1.0
+python-docx>=0.8.11
+pyreadstat>=1.2.0
+
+# 可选：高性能计算
+# numba>=0.56.0
