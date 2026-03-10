@@ -817,8 +817,6 @@ else:
         
         # 创建标签页
         # 创建标签页
-        if st.session_state.get('optimization_results') is not None:
-        if st.session_state.get('optimization_results') is not None:
             tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
                 "📊 描述性统计", 
                 "📈 基准回归", 
