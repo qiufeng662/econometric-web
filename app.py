@@ -23,6 +23,13 @@ import tempfile
 import warnings
 warnings.filterwarnings('ignore')
 
+# 导入显著性优化模块
+try:
+    from optimization_analysis import significance_optimization, generate_optimization_report
+    OPTIMIZATION_AVAILABLE = True
+except ImportError:
+    OPTIMIZATION_AVAILABLE = False
+
 # ============================================================
 # 页面配置
 # ============================================================
@@ -633,7 +640,34 @@ with st.sidebar:
             index=0,
             help="选择分组变量进行异质性分析"
         )
+        # 异质性分组变量
+        group_var = st.selectbox(
+            "异质性分组变量",
+            options=['无'] + all_vars,
+            index=0,
+            help="选择分组变量进行异质性分析"
+        )
         
+        # 显著性优化选项
+        st.markdown("---")
+        st.markdown("### ✨ 显著性优化")
+        enable_optimization = st.checkbox(
+            "启用显著性优化",
+            value=False,
+            help="自动尝试多种方法优化回归结果"
+        )
+        
+        if enable_optimization and OPTIMIZATION_AVAILABLE:
+            target_p = st.selectbox(
+                "目标显著性水平",
+                options=[0.01, 0.05, 0.1],
+                index=1,
+                help="优化目标：P 值小于该水平"
+            )
+        elif enable_optimization and not OPTIMIZATION_AVAILABLE:
+            st.warning("优化模块未找到，请确保 optimization_analysis.py 存在")
+        else:
+            target_p = 0.05
         # 分析按钮
         st.markdown("---")
         run_analysis = st.button("🚀 开始分析", type="primary", use_container_width=True)
@@ -757,7 +791,25 @@ else:
                 st.session_state.treat_var = treat_var
                 st.session_state.control_vars = control_vars
                 st.session_state.group_var = group_var
+                st.session_state.group_var = group_var
                 
+                # 7. 显著性优化分析
+                if enable_optimization and OPTIMIZATION_AVAILABLE:
+                    with st.spinner("正在进行显著性优化分析（这可能需要几分钟）..."):
+                        try:
+                            opt_results, all_opt_results = significance_optimization(
+                                df, dep_var, treat_var, control_vars,
+                                target_p=target_p,
+                                output_dir=tempfile.gettempdir()
+                            )
+                            st.session_state.optimization_results = opt_results
+                            st.session_state.all_optimization_results = all_opt_results
+                            st.success("✅ 显著性优化完成！")
+                        except Exception as e:
+                            st.error(f"优化分析失败：{str(e)}")
+                            st.session_state.optimization_results = None
+                
+                st.success("✅ 分析完成！")
                 st.success("✅ 分析完成！")
         
         # 显示结果
@@ -772,7 +824,28 @@ else:
             "📐 固定效应",
             "🔍 诊断检验",
             "📥 报告下载"
-        ])
+        # 创建标签页
+        if st.session_state.get('optimization_results') is not None:
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+                "📊 描述性统计", 
+                "📈 基准回归", 
+                "🔬 异质性分析", 
+                "🛡️ 稳健性检验",
+                "📐 固定效应",
+                "🔍 诊断检验",
+                "✨ 显著性优化",
+                "📥 报告下载"
+            ])
+        else:
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+                "📊 描述性统计", 
+                "📈 基准回归", 
+                "🔬 异质性分析", 
+                "🛡️ 稳健性检验",
+                "📐 固定效应",
+                "🔍 诊断检验",
+                "📥 报告下载"
+            ])
         
         # Tab 1: 描述性统计
         with tab1:
@@ -1019,7 +1092,124 @@ else:
                     st.warning(f"⚠️ 结论：{dw['conclusion']}")
                 else:
                     st.success(f"✅ 结论：{dw['conclusion']}")
+
         
+        # Tab 7: 显著性优化
+        if st.session_state.get('optimization_results') is not None:
+            with tab7:
+                st.markdown("### ✨ 显著性优化分析")
+                
+                st.info("""
+                **显著性优化说明**：本工具尝试多种方法（数据层面、模型层面、样本层面等）优化回归结果
+                
+                ⚠️ **学术诚信提醒**：本功能仅供学术研究和稳健性检验使用，请在学术诚信的前提下使用
+                """)
+                
+                opt_results = st.session_state.optimization_results
+                all_opt_results = st.session_state.all_optimization_results
+                
+                # 优化结果对比表格
+                st.markdown("#### 优化结果对比")
+                
+                optimization_log = opt_results.get('optimization_log', [])
+                if optimization_log:
+                    opt_df = pd.DataFrame(optimization_log)
+                    
+                    # 添加显著性标记
+                    def add_sig(p):
+                        if p < 0.01:
+                            return '***'
+                        elif p < 0.05:
+                            return '**'
+                        elif p < 0.1:
+                            return '*'
+                        else:
+                            return ''
+                    
+                    opt_df['显著性'] = opt_df['pvalue'].apply(add_sig)
+                    
+                    # 格式化显示
+                    display_df = opt_df.copy()
+                    display_df['系数'] = display_df['coef'].apply(lambda x: f"{x:.4f}")
+                    display_df['标准误'] = display_df['se'].apply(lambda x: f"({x:.4f})")
+                    display_df['P 值'] = display_df['pvalue'].apply(lambda x: f"{x:.4f}")
+                    
+                    display_cols = ['method', 'coef', 'se', 'pvalue', '显著性', 'n']
+                    st.dataframe(display_df[display_cols], use_container_width=True, hide_index=True)
+                    
+                    st.markdown("注：*** p<0.01, ** p<0.05, * p<0.1")
+                    
+                    # 最优模型
+                    if opt_results.get('best_model'):
+                        st.markdown("#### 🏆 最优模型")
+                        best = opt_results['best_model']
+                        best_sig = add_sig(best['pvalue'])
+                        
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("优化方法", best['method'])
+                        with col2:
+                            st.metric("系数", f"{best['coef']:.4f}{best_sig}")
+                        with col3:
+                            st.metric("P 值", f"{best['pvalue']:.4f}")
+                    
+                    # 诊断检验
+                    diagnostics = opt_results.get('diagnostics', {})
+                    if diagnostics:
+                        st.markdown("#### 诊断检验")
+                        
+                        diag_col1, diag_col2 = st.columns(2)
+                        
+                        with diag_col1:
+                            if 'vif' in diagnostics and diagnostics['vif'] is not None:
+                                st.markdown("**VIF 多重共线性检验**")
+                                st.dataframe(diagnostics['vif'], use_container_width=True, hide_index=True)
+                        
+                        with diag_col2:
+                            if 'bp_test' in diagnostics:
+                                bp = diagnostics['bp_test']
+                                st.markdown("**BP 异方差检验**")
+                                st.write(f"LM 统计量：{bp['lm_statistic']:.4f}, P 值：{bp['lm_pvalue']:.4f}")
+                                st.write(f"结论：{bp['conclusion']}")
+                            
+                            if 'dw_test' in diagnostics:
+                                dw = diagnostics['dw_test']
+                                st.markdown("**DW 自相关检验**")
+                                st.write(f"DW 统计量：{dw['dw_statistic']:.4f}")
+                                st.write(f"结论：{dw['conclusion']}")
+                    
+                    # 优化方法说明
+                    with st.expander("📖 优化方法说明"):
+                        st.markdown("""
+                        **数据层面优化**：
+                        - Winsorize 缩尾（1%/5%）：处理极端值
+                        - 对数转换：改善变量分布
+                        
+                        **模型层面优化**：
+                        - 不同稳健标准误（HC1/HC2/HC3）：处理异方差
+                        - 固定效应模型：控制个体/时间异质性
+                        - 聚类标准误：处理组内相关
+                        
+                        **样本层面优化**：
+                        - 剔除极端值：排除异常观测
+                        
+                        **诊断检验**：
+                        - VIF：多重共线性诊断
+                        - BP 检验：异方差检验
+                        - DW 检验：自相关检验
+                        """)
+                else:
+                    st.warning("未找到优化结果")
+        
+        # Tab 8: 报告下载（如果有优化结果）
+        if st.session_state.get('optimization_results') is not None:
+            with tab8:
+        else:
+        # Tab 8: 报告下载
+        if st.session_state.get('optimization_results') is not None:
+            with tab8:
+        else:
+            with tab7:
         # Tab 7: 报告下载
         with tab7:
             st.markdown("### 📥 分析报告下载")
