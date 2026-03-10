@@ -1204,7 +1204,8 @@ else:
                     st.markdown("包含完整的描述性统计、回归结果、稳健性检验等内容")
                     
                     # 生成报告
-                    if st.button("📄 生成 Word 报告", type="primary"):
+                    # 生成报告
+                    if st.button("📄 生成 Word 报告", type="primary", key="word_report_btn"):
                         with st.spinner("正在生成报告..."):
                             word_buffer = generate_word_report(results)
                             
@@ -1220,7 +1221,7 @@ else:
                     st.markdown("#### ✨ 显著性优化报告")
                     st.markdown("包含所有优化方法对比和诊断检验")
                     
-                    if st.button("📄 生成显著性优化报告", type="primary"):
+                    if st.button("📄 生成显著性优化报告", type="primary", key="opt_report_btn"):
                         with st.spinner("正在生成优化报告..."):
                             try:
                                 from optimization_analysis import generate_optimization_report
@@ -1255,6 +1256,12 @@ else:
                         label="📊 下载描述性统计 (CSV)",
                         data=desc_csv,
                         file_name="描述性统计.csv",
+                        mime="text/csv",
+                        key="desc_stats_download"
+                    )
+                        label="📊 下载描述性统计 (CSV)",
+                        data=desc_csv,
+                        file_name="描述性统计.csv",
                         mime="text/csv"
                     )
                     
@@ -1263,6 +1270,12 @@ else:
                         model = results['baseline']['model']
                         reg_summary = model.summary().as_csv()
                         st.download_button(
+                            label="📈 下载回归结果 (CSV)",
+                            data=reg_summary.encode('utf-8-sig'),
+                            file_name="回归结果.csv",
+                            mime="text/csv",
+                            key="reg_results_download"
+                        )
                             label="📈 下载回归结果 (CSV)",
                             data=reg_summary.encode('utf-8-sig'),
                             file_name="回归结果.csv",
@@ -1279,7 +1292,8 @@ else:
                     st.markdown("包含完整的描述性统计、回归结果、稳健性检验等内容")
                     
                     # 生成报告
-                    if st.button("📄 生成 Word 报告", type="primary"):
+                    # 生成报告
+                    if st.button("📄 生成 Word 报告", type="primary", key="word_report_btn_no_opt"):
                         with st.spinner("正在生成报告..."):
                             word_buffer = generate_word_report(results)
                             
@@ -1295,7 +1309,13 @@ else:
                     
                     # 描述性统计
                     desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')
-                    st.download_button(
+                        st.download_button(
+                            label="📊 下载描述性统计 (CSV)",
+                            data=desc_csv,
+                            file_name="描述性统计.csv",
+                            mime="text/csv",
+                            key="desc_stats_download_no_opt"
+                        )
                         label="📊 下载描述性统计 (CSV)",
                         data=desc_csv,
                         file_name="描述性统计.csv",
@@ -1306,7 +1326,13 @@ else:
                     if results['baseline']:
                         model = results['baseline']['model']
                         reg_summary = model.summary().as_csv()
-                        st.download_button(
+                            st.download_button(
+                                label="📈 下载回归结果 (CSV)",
+                                data=reg_summary.encode('utf-8-sig'),
+                                file_name="回归结果.csv",
+                                mime="text/csv",
+                                key="reg_results_download_no_opt"
+                            )
                             label="📈 下载回归结果 (CSV)",
                             data=reg_summary.encode('utf-8-sig'),
                             file_name="回归结果.csv",
