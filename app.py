@@ -1195,51 +1195,123 @@ else:
         # Tab 8: 报告下载（如果有优化结果）
         if st.session_state.get('optimization_results') is not None:
             with tab8:
-        else:
-            with tab7:
-            st.markdown("### 📥 分析报告下载")
-            st.markdown("### 📥 分析报告下载")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("#### Word 分析报告")
-                st.markdown("包含完整的描述性统计、回归结果、稳健性检验等内容")
+                st.markdown("### 📥 分析报告下载")
                 
-                # 生成报告
-                if st.button("📄 生成 Word 报告", type="primary"):
-                    with st.spinner("正在生成报告..."):
-                        word_buffer = generate_word_report(results)
-                        
-                        st.download_button(
-                            label="📥 下载 Word 报告",
-                            data=word_buffer,
-                            file_name="实证分析报告.docx",
-                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                        )
-            
-            with col2:
-                st.markdown("#### 数据下载")
+                col1, col2 = st.columns(2)
                 
-                # 描述性统计
-                desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')
-                st.download_button(
-                    label="📊 下载描述性统计 (CSV)",
-                    data=desc_csv,
-                    file_name="描述性统计.csv",
-                    mime="text/csv"
-                )
+                with col1:
+                    st.markdown("#### Word 分析报告")
+                    st.markdown("包含完整的描述性统计、回归结果、稳健性检验等内容")
+                    
+                    # 生成报告
+                    if st.button("📄 生成 Word 报告", type="primary"):
+                        with st.spinner("正在生成报告..."):
+                            word_buffer = generate_word_report(results)
+                            
+                            st.download_button(
+                                label="📥 下载 Word 报告",
+                                data=word_buffer,
+                                file_name="实证分析报告.docx",
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            )
+                    
+                    # 显著性优化报告
+                    st.markdown("---")
+                    st.markdown("#### ✨ 显著性优化报告")
+                    st.markdown("包含所有优化方法对比和诊断检验")
+                    
+                    if st.button("📄 生成显著性优化报告", type="primary"):
+                        with st.spinner("正在生成优化报告..."):
+                            try:
+                                from optimization_analysis import generate_optimization_report
+                                import tempfile
+                                
+                                opt_results = st.session_state.optimization_results
+                                all_opt_results = st.session_state.all_optimization_results
+                                
+                                # 生成优化报告
+                                report_path = os.path.join(tempfile.gettempdir(), '显著性优化报告.docx')
+                                generate_optimization_report(opt_results, all_opt_results, report_path)
+                                
+                                # 读取文件供下载
+                                with open(report_path, 'rb') as f:
+                                    report_data = f.read()
+                                
+                                st.download_button(
+                                    label="📥 下载显著性优化报告",
+                                    data=report_data,
+                                    file_name="显著性优化报告.docx",
+                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                )
+                            except Exception as e:
+                                st.error(f"生成优化报告失败：{str(e)}")
                 
-                # 回归结果
-                if results['baseline']:
-                    model = results['baseline']['model']
-                    reg_summary = model.summary().as_csv()
+                with col2:
+                    st.markdown("#### 数据下载")
+                    
+                    # 描述性统计
+                    desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')
                     st.download_button(
-                        label="📈 下载回归结果 (CSV)",
-                        data=reg_summary.encode('utf-8-sig'),
-                        file_name="回归结果.csv",
+                        label="📊 下载描述性统计 (CSV)",
+                        data=desc_csv,
+                        file_name="描述性统计.csv",
                         mime="text/csv"
                     )
+                    
+                    # 回归结果
+                    if results['baseline']:
+                        model = results['baseline']['model']
+                        reg_summary = model.summary().as_csv()
+                        st.download_button(
+                            label="📈 下载回归结果 (CSV)",
+                            data=reg_summary.encode('utf-8-sig'),
+                            file_name="回归结果.csv",
+                            mime="text/csv"
+                        )
+        else:
+            with tab7:
+                st.markdown("### 📥 分析报告下载")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("#### Word 分析报告")
+                    st.markdown("包含完整的描述性统计、回归结果、稳健性检验等内容")
+                    
+                    # 生成报告
+                    if st.button("📄 生成 Word 报告", type="primary"):
+                        with st.spinner("正在生成报告..."):
+                            word_buffer = generate_word_report(results)
+                            
+                            st.download_button(
+                                label="📥 下载 Word 报告",
+                                data=word_buffer,
+                                file_name="实证分析报告.docx",
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            )
+                
+                with col2:
+                    st.markdown("#### 数据下载")
+                    
+                    # 描述性统计
+                    desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')
+                    st.download_button(
+                        label="📊 下载描述性统计 (CSV)",
+                        data=desc_csv,
+                        file_name="描述性统计.csv",
+                        mime="text/csv"
+                    )
+                    
+                    # 回归结果
+                    if results['baseline']:
+                        model = results['baseline']['model']
+                        reg_summary = model.summary().as_csv()
+                        st.download_button(
+                            label="📈 下载回归结果 (CSV)",
+                            data=reg_summary.encode('utf-8-sig'),
+                            file_name="回归结果.csv",
+                            mime="text/csv"
+                        )
 
 # ============================================================
 # 页脚
