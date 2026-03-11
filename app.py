@@ -1247,96 +1247,86 @@ else:
                             except Exception as e:
                                 st.error(f"生成优化报告失败：{str(e)}")
                 
-                with col2:
-                    st.markdown("#### 数据下载")
+                with col2:   col2:
+                    st.markdown("#### 数据下载")   st.markdown   减价("#### Data Download")
                     
                     # 描述性统计
-                    desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')
+                    desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')desc_csv = results['descriptive'   “描述性”].T.to_csv().encode   编码('utf-8-sig'   “utf-8-sig”)  # 将描述性统计结果转为 CSV 格式并编码为 UTF-8 带 BOM 格式
                     st.download_button(
-                        label="📊 下载描述性统计 (CSV)",
+                        label="📊 下载描述性统计 (CSV)",label=" 📊 Download Descriptive Statistics (CSV) ,
                         data=desc_csv,
-                        file_name="描述性统计.csv",
-                        mime="text/csv",
+                        file_name="描述性统计.csv",   file_name=" "Descriptive Statistics.csv" ,
+                        mime="text/csv",   mime="text/csv",
                         key="desc_stats_download"
                     )
 
                     
                     # 回归结果
-                    if results['baseline']:
+                    if results['baseline']:   mime="text/csv",   如果结果中存在“基准线”：
                         model = results['baseline']['model']
-                        reg_summary = model.summary().as_csv()
+                        reg_summary = model.summary().as_csv()reg_summary = 模型总结().以 CSV 格式输出()
                         st.download_button(
-                            label="📈 下载回归结果 (CSV)",
-                            data=reg_summary.encode('utf-8-sig'),
+                            label=   label=" 📈 Download Regression Results (CSV) ,"📈 下载回归结果 (CSV)",
+                            data=reg_summary.encode   编码('utf-8-sig'   “utf-8-sig”),
                             file_name="回归结果.csv",
-                            mime="text/csv",
+                            mime=   mime="text/csv","text/csv"   "text/csv",
                             key="reg_results_download"
                         )
 
         else:
-            with tab7:
-                st.markdown("### 📥 分析报告下载")
+            with   与 tab7:
+                st.markdown   减价("### 📥 分析报告下载")
                 
                 col1, col2 = st.columns(2)
                 
-                with col1:
-                    st.markdown("#### Word 分析报告")
-                    st.markdown("包含完整的描述性统计、回归结果、稳健性检验等内容")
+                with   与 col1:
+                    st.markdown   减价("#### Word 分析报告")
+                    st.markdown   减价("包含完整的描述性统计、回归结果、稳健性检验等内容")
                     
                     # 生成报告
                     # 生成报告
-                    if st.button("📄 生成 Word 报告", type="primary", key="word_report_btn_no_opt"):
-                        with st.spinner("正在生成报告..."):
-                            word_buffer = generate_word_report(results)
+                    if st.button("📄 生成 Word 报告", type="primary", key="word_report_btn_no_opt"):if st.button("📄 Generate Word Report", type="primary", key="word_report_btn_no_opt"):
+                        with st.spinner("正在生成报告..."):with st.spinner("Generating report...") "):
+                            word_buffer = generate_word_report   生成单词报告(results)
                             
                             st.download_button(
-                                label="📥 下载 Word 报告",
-                                data=word_buffer,
-                                file_name="实证分析报告.docx",
+                                label="📥 下载 Word 报告",   label=" Download the Word report. ,
+                                data=word_buffer,   = word_buffer日期,
+                                file_name="实证分析报告.docx",   file_name=" Empirical Analysis Report.docx ,
                                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                             )
                 
-                with col2:
-                    st.markdown("#### 数据下载")
+                with col2:   col2:
+                    st.markdown   减价("#### 数据下载")
                     
                     # 描述性统计
-                    desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')
-                        st.download_button(
-                            label="📊 下载描述性统计 (CSV)",
-                            data=desc_csv,
-                            file_name="描述性统计.csv",
-                            mime="text/csv",
-                            key="desc_stats_download_no_opt"
-                        )
-                        label="📊 下载描述性统计 (CSV)",
+                    desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')  # 将描述性统计结果转为 CSV 格式并编码为 UTF-8 带 BOM 格式
+                    st.download_button(
+                        label="📊 下载描述性统计 (CSV)",label=" 📊 Download Descriptive Statistics (CSV) ,
                         data=desc_csv,
-                        file_name="描述性统计.csv",
-                        mime="text/csv"
+                        file_name="描述性统计.csv",   file_name=" "Descriptive Statistics.csv" ,
+                        mime="text/csv",
+                        key="desc_stats_download_no_opt"
                     )
                     
                     # 回归结果
-                    if results['baseline']:
+                    if results['baseline']:   如果结果中存在“基准线”：
                         model = results['baseline']['model']
-                        reg_summary = model.summary().as_csv()
-                            st.download_button(
-                                label="📈 下载回归结果 (CSV)",
-                                data=reg_summary.encode('utf-8-sig'),
-                                file_name="回归结果.csv",
-                                mime="text/csv",
-                                key="reg_results_download_no_opt"
-                            )
-                            label="📈 下载回归结果 (CSV)",
+                        reg_summary = model.summary().as_csv()reg_summary = 模型总结().以 CSV 格式输出()
+                        st.download_button(
+                            label="📈 下载回归结果 (CSV)",   label=" 📈 Download Regression Results (CSV) ,
                             data=reg_summary.encode('utf-8-sig'),
                             file_name="回归结果.csv",
-                            mime="text/csv"
+                            mime="text/csv",
+                            key="reg_results_download_no_opt"
                         )
 
 # ============================================================
 # 页脚
 # ============================================================
-st.markdown("---")
-st.markdown("""
+st.markdown   减价("---")
+st.markdown   减价("""   st.markdown   """("""   """
 <div style="text-align: center; color: #999; font-size: 0.85rem;">
     <p>一键实证分析工具 | 基于 Streamlit 构建 | 支持多种数据格式和分析方法</p>
-</div>
-""", unsafe_allow_html=True)
+</div>   < / div>
+""", unsafe_allow_html=True)""", unsafe_allow_html=   真正的True   """)"""""", unsafe_allow_html=True), unsafe_allow_html=True)
