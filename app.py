@@ -1267,51 +1267,34 @@ else:
                         )
 
     else:
-                st.markdown("### 📥 分析报告下载")
+        # 只有在有分析结果时才显示下载选项
+        if 'analysis_results' in st.session_state and st.session_state.analysis_results is not None:
+            results = st.session_state.analysis_results
+            
+            with col2:
+                st.markdown("#### 数据下载")
                 
-                col1, col2 = st.columns(2)
+                # 描述性统计
+                desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')
+                st.download_button(
+                    label="📊 下载描述性统计 (CSV)",
+                    data=desc_csv,
+                    file_name="描述性统计.csv",
+                    mime="text/csv",
+                    key="desc_stats_download_no_opt"
+                )
                 
-                with col1:
-                    st.markdown("#### Word 分析报告")
-                    st.markdown("包含完整的描述性统计、回归结果、稳健性检验等内容")
-                    
-                    # 生成报告
-                    # 生成报告
-                    if st.button("📄 生成 Word 报告", type="primary", key="word_report_btn_no_opt"):
-                        with st.spinner("正在生成报告..."):
-                            word_buffer = generate_word_report(results)
-                            
-                            st.download_button(
-                                label="📥 下载 Word 报告",
-                                data=word_buffer,
-                                file_name="实证分析报告.docx",
-                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            )
-                
-                with col2:
-                    st.markdown("#### 数据下载")
-                    
-                    # 描述性统计
-                    desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')
+                # 回归结果
+                if results['baseline']:
+                    model = results['baseline']['model']
+                    reg_summary = model.summary().as_csv()
                     st.download_button(
-                        label="📊 下载描述性统计 (CSV)",
-                        data=desc_csv,
-                        file_name="描述性统计.csv",
+                        label="📈 下载回归结果 (CSV)",
+                        data=reg_summary.encode('utf-8-sig'),
+                        file_name="回归结果.csv",
                         mime="text/csv",
-                        key="desc_stats_download_no_opt"
+                        key="reg_results_download_no_opt"
                     )
-                    
-                    # 回归结果
-                    if results['baseline']:
-                        model = results['baseline']['model']
-                        reg_summary = model.summary().as_csv()
-                        st.download_button(
-                            label="📈 下载回归结果 (CSV)",
-                            data=reg_summary.encode('utf-8-sig'),
-                            file_name="回归结果.csv",
-                            mime="text/csv",
-                            key="reg_results_download_no_opt"
-                        )
 
 # ============================================================
 # 页脚
