@@ -640,13 +640,6 @@ with st.sidebar:
             index=0,
             help="选择分组变量进行异质性分析"
         )
-        # 异质性分组变量
-        group_var = st.selectbox(
-            "异质性分组变量",
-            options=['无'] + all_vars,
-            index=0,
-            help="选择分组变量进行异质性分析"
-        )
         
         # 显著性优化选项
         st.markdown("---")
