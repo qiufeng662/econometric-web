@@ -496,10 +496,20 @@ def ramsey_reset_test(model, n_fitted=2):
     # RESET 检验
     reset_test = sm.stats.diagnostic.linear_reset(model, power=n_fitted)
     
+    # 处理不同版本的 statsmodels 返回值
+    if hasattr(reset_test, 'statistic') and hasattr(reset_test, 'pvalue'):
+        # 新版本返回 ContrastResults 对象
+        f_stat = reset_test.statistic
+        p_val = reset_test.pvalue
+    else:
+        # 旧版本返回元组
+        f_stat = reset_test[0]
+        p_val = reset_test[1]
+    
     return {
-        'f_statistic': reset_test[0],
-        'pvalue': reset_test[1],
-        'conclusion': '模型设定可能有问题 (p<0.05)' if reset_test[1] < 0.05 else '模型设定合理 (p>=0.05)'
+        'f_statistic': f_stat,
+        'pvalue': p_val,
+        'conclusion': '模型设定可能有问题 (p<0.05)' if p_val < 0.05 else '模型设定合理 (p>=0.05)'
     }
 
 
