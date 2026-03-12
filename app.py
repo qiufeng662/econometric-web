@@ -1044,16 +1044,6 @@ else:
                 "📥 报告下载"
             ])
             tab1, tab2, tab3, tab4, tab5, tab6, tab7 = tabs
-        else:
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-                "📊 描述性统计", 
-                "📈 基准回归", 
-                "🔬 异质性分析", 
-                "🛡️ 稳健性检验",
-                "📐 固定效应",
-                "🔍 诊断检验",
-                "📥 报告下载"
-            ])
         
         # Tab 1: 描述性统计
         with tab1:
