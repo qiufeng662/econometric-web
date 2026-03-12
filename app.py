@@ -1419,13 +1419,13 @@ else:
                     # 描述性统计
                     if 'descriptive' in results:
                         desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')  # 将描述性统计结果转为 CSV 格式并编码为 UTF-8 带 BOM 格式
-                    st.download_button(
-                        label="📊 下载描述性统计 (CSV)",
-                        data=desc_csv,
-                        file_name="描述性统计.csv",
-                        mime="text/csv",
-                        key="desc_stats_download"
-                    )
+                        st.download_button(
+                            label="📊 下载描述性统计 (CSV)",
+                            data=desc_csv,
+                            file_name="描述性统计.csv",
+                            mime="text/csv",
+                            key="desc_stats_download"
+                        )
 
                     
                     # 回归结果
