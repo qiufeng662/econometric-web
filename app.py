@@ -680,7 +680,8 @@ with st.sidebar:
             enable_econometric = st.checkbox(
                 "启用计量经济学方法",
                 value=False,
-                help="使用 DID、IV、PSM、RDD、SCM 等高级计量方法"
+                help="使用 DID、IV、PSM、RDD、SCM 等高级计量方法",
+                key="enable_econometric"
             )
             
             if enable_econometric:
@@ -747,7 +748,8 @@ with st.sidebar:
             enable_econometric = st.checkbox(
                 "启用计量经济学方法",
                 value=False,
-                help="使用 DID、IV、PSM、RDD、SCM 等高级计量方法"
+                help="使用 DID、IV、PSM、RDD、SCM 等高级计量方法",
+                key="enable_econometric"
             )
             
             if enable_econometric:
