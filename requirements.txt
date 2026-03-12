@@ -11,6 +11,7 @@ numpy>=1.23.0
 # 统计分析
 statsmodels>=0.13.0
 scipy>=1.9.0
+linearmodels>=5.0.0  # 面板数据、IV 等高级计量方法
 
 # 数据可视化
 plotly>=5.15.0
@@ -20,9 +21,3 @@ matplotlib>=3.6.0
 openpyxl>=3.1.0
 python-docx>=0.8.11
 pyreadstat>=1.2.0
-
-# 可选：高性能计算
-# numba>=0.56.0
-
-# 显著性优化模块（可选）
-# linearmodels>=5.0.0  # 工具变量法需要
