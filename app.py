@@ -1358,22 +1358,27 @@ else:
                 else:
                     st.info("未检测到计量经济学方法结果")
         
-        # Tab 9: 报告下载（如果有优化结果）
-        if st.session_state.get('optimization_results') is not None:
-            with tab8:
+        # Tab 8/9: 报告下载
+        report_tab = tab9 if has_optimization else tab8
+        with report_tab:
                 st.markdown("### 📥 分析报告下载")
                 
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.markdown("#### Word 分析报告")
-                    st.markdown("包含完整的描述性统计、回归结果、稳健性检验等内容")
+                # 确保有分析结果
+                if 'analysis_results' not in st.session_state or st.session_state.analysis_results is None:
+                    st.warning("请先运行分析再生成报告")
+                else:
+                    results = st.session_state.analysis_results
                     
-                    # 生成报告
-                    # 生成报告
-                    if st.button("📄 生成 Word 报告", type="primary", key="word_report_btn"):
-                        with st.spinner("正在生成报告..."):
-                            word_buffer = generate_word_report(results)
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown("#### Word 分析报告")
+                        st.markdown("包含完整的描述性统计、回归结果、稳健性检验等内容")
+                        
+                        # 生成报告
+                        if st.button("📄 生成 Word 报告", type="primary", key="word_report_btn"):
+                            with st.spinner("正在生成报告..."):
+                                word_buffer = generate_word_report(results)
                             
                             st.download_button(
                                 label="📥 下载 Word 报告",
