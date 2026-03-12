@@ -1429,7 +1429,7 @@ else:
 
                     
                     # 回归结果
-                    if results['baseline']:
+                    if 'baseline' in results and results['baseline']:
                         model = results['baseline']['model']
                         reg_summary = model.summary().as_csv()
                         st.download_button(
