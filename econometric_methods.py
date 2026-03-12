@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 计量经济学方法模块
-支持各种DID方法、IV、PSM、RDD、SCM等
+支持各种 DID 方法、IV、PSM、RDD、SCM 等
 """
 
 import pandas as pd
@@ -22,7 +22,7 @@ warnings.filterwarnings('ignore')
 
 def classic_did(df, dep_var, treat_var, time_var, post_period, id_var=None, controls=None):
     """
-    经典DID方法
+    经典 DID 方法
     
     Parameters:
     -----------
@@ -43,7 +43,7 @@ def classic_did(df, dep_var, treat_var, time_var, post_period, id_var=None, cont
     
     Returns:
     --------
-    dict : DID结果
+    dict : DID 结果
     """
     df_did = df.copy()
     
@@ -79,12 +79,12 @@ def classic_did(df, dep_var, treat_var, time_var, post_period, id_var=None, cont
         'did_pvalue': model.pvalues.get('did', np.nan),
         'pre_trend_p': pre_trend_p,
         'n_obs': len(df_did),
-        'method': '经典DID'
+        'method': '经典 DID'
     }
 
 def multiple_period_did(df, dep_var, treat_var, time_var, treat_time_var, controls=None):
     """
-    多期DID方法（允许不同个体在不同时间接受处理）
+    多期 DID 方法（允许不同个体在不同时间接受处理）
     
     Parameters:
     -----------
@@ -103,7 +103,7 @@ def multiple_period_did(df, dep_var, treat_var, time_var, treat_time_var, contro
     
     Returns:
     --------
-    dict : 多期DID结果
+    dict : 多期 DID 结果
     """
     df_did = df.copy()
     
@@ -124,13 +124,13 @@ def multiple_period_did(df, dep_var, treat_var, time_var, treat_time_var, contro
     return {
         'model': model,
         'n_obs': len(df_did),
-        'method': '多期DID'
+        'method': '多期 DID'
     }
 
 def event_study_did(df, dep_var, treat_var, time_var, treat_time_var, 
                    time_window=(-5, 5), controls=None):
     """
-    事件研究DID方法
+    事件研究 DID 方法
     
     Parameters:
     -----------
@@ -162,7 +162,7 @@ def event_study_did(df, dep_var, treat_var, time_var, treat_time_var,
     df_event = df_event[(df_event['event_time'] >= time_window[0]) & 
                        (df_event['event_time'] <= time_window[1])]
     
-    # 创建相对时间哑变量（以-1期为基准）
+    # 创建相对时间哑变量（以 -1 期为基准）
     df_event['event_time_factor'] = pd.Categorical(df_event['event_time'], 
                                                   categories=sorted(df_event['event_time'].unique()))
     
@@ -180,7 +180,7 @@ def event_study_did(df, dep_var, treat_var, time_var, treat_time_var,
     pvalues = {}
     
     for time_point in sorted(df_event['event_time'].unique()):
-        if time_point != -1:  # -1期作为基准
+        if time_point != -1:  # -1 期作为基准
             param_name = f"C(event_time_factor)[T.{time_point}]"
             coefs[time_point] = model.params.get(param_name, np.nan)
             ses[time_point] = model.bse.get(param_name, np.nan)
@@ -193,7 +193,7 @@ def event_study_did(df, dep_var, treat_var, time_var, treat_time_var,
         'pvalues': pvalues,
         'time_points': sorted(df_event['event_time'].unique()),
         'n_obs': len(df_event),
-        'method': '事件研究DID'
+        'method': '事件研究 DID'
     }
 
 def difference_in_difference_in_differences(df, dep_var, treat_var1, treat_var2, 
@@ -220,7 +220,7 @@ def difference_in_difference_in_differences(df, dep_var, treat_var1, treat_var2,
     
     Returns:
     --------
-    dict : DDD结果
+    dict : DDD 结果
     """
     df_ddd = df.copy()
     
@@ -270,7 +270,7 @@ def instrumental_variables(df, dep_var, endog_var, instruments, controls=None):
     
     Returns:
     --------
-    dict : IV结果
+    dict : IV 结果
     """
     # 第一阶段：内生变量对工具变量和控制变量回归
     first_stage_vars = instruments + (controls if controls else [])
@@ -278,7 +278,7 @@ def instrumental_variables(df, dep_var, endog_var, instruments, controls=None):
     
     first_model = ols(formula=first_formula, data=df).fit()
     
-    # 计算F统计量（弱工具变量检验）
+    # 计算 F 统计量（弱工具变量检验）
     f_stat = first_model.fvalue
     f_pvalue = first_model.f_pvalue
     
@@ -293,7 +293,7 @@ def instrumental_variables(df, dep_var, endog_var, instruments, controls=None):
     
     second_model = ols(formula=second_formula, data=df_iv).fit(cov_type='HC3')
     
-    # IV估计量
+    # IV 估计量
     iv_coef = second_model.params[f'{endog_var}_fitted']
     iv_se = second_model.bse[f'{endog_var}_fitted']
     iv_pvalue = second_model.pvalues[f'{endog_var}_fitted']
@@ -341,7 +341,7 @@ def propensity_score_matching(df, treat_var, covariates, caliper=0.05, method='n
     
     Returns:
     --------
-    dict : PSM结果
+    dict : PSM 结果
     """
     df_psm = df.copy()
     
@@ -397,7 +397,7 @@ def propensity_score_matching(df, treat_var, covariates, caliper=0.05, method='n
 
 def psm_att_estimation(matched_data, dep_var, treat_var, covariates):
     """
-    基于匹配数据的ATT估计
+    基于匹配数据的 ATT 估计
     
     Parameters:
     -----------
@@ -412,7 +412,7 @@ def psm_att_estimation(matched_data, dep_var, treat_var, covariates):
     
     Returns:
     --------
-    dict : ATT估计结果
+    dict : ATT 估计结果
     """
     # 简单均值比较
     treated_mean = matched_data[matched_data[treat_var] == 1][dep_var].mean()
@@ -462,7 +462,7 @@ def regression_discontinuity_design(df, dep_var, running_var, cutoff,
     
     Returns:
     --------
-    dict : RDD结果
+    dict : RDD 结果
     """
     df_rdd = df.copy()
     
@@ -485,7 +485,7 @@ def regression_discontinuity_design(df, dep_var, running_var, cutoff,
     # 回归
     model = ols(formula=formula, data=df_rdd).fit(cov_type='HC3')
     
-    # LATE估计量
+    # LATE 估计量
     late = model.params.get('treated', np.nan)
     
     return {
@@ -527,10 +527,10 @@ def synthetic_control_method(df, dep_var, treat_unit, time_var, treat_time,
     
     Returns:
     --------
-    dict : SCM结果
+    dict : SCM 结果
     """
-    # 这里提供简化版本，实际SCM需要更复杂的优化算法
-    # 完整实现需要使用专门的SCM包
+    # 这里提供简化版本，实际 SCM 需要更复杂的优化算法
+    # 完整实现需要使用专门的 SCM 包
     
     df_scm = df.copy()
     
@@ -621,7 +621,7 @@ def quantile_regression(df, dep_var, treat_var, controls=None, quantiles=[0.25, 
         import statsmodels.formula.api as smf
         from statsmodels.regression.quantile_regression import QuantReg
     except ImportError:
-        return {'error': '需要安装statsmodels支持分位数回归'}
+        return {'error': '需要安装 statsmodels 支持分位数回归'}
     
     results = {}
     
@@ -675,7 +675,7 @@ def panel_data_models(df, dep_var, treat_var, controls, id_var, time_var,
     try:
         import linearmodels as lm
     except ImportError:
-        return {'error': '需要安装linearmodels包'}
+        return {'error': '需要安装 linearmodels 包'}
     
     # 设置多重索引
     df_panel = df.set_index([id_var, time_var])
@@ -705,7 +705,7 @@ def panel_data_models(df, dep_var, treat_var, controls, id_var, time_var,
         'pvalue': result.pvalues.get(treat_var, np.nan),
         'r2': result.rsquared,
         'n_obs': result.nobs,
-        'method': f'面板数据({model_type})'
+        'method': f'面板数据 ({model_type})'
     }
 
 # ============================================================
@@ -729,32 +729,32 @@ def format_econometric_results(results_dict):
     
     for method, result in results_dict.items():
         if method == 'classic_did':
-            formatted['经典DID'] = {
-                'DID系数': f"{result['did_coef']:.4f}",
+            formatted['经典 DID'] = {
+                'DID 系数': f"{result['did_coef']:.4f}",
                 '标准误': f"({result['did_se']:.4f})",
-                'P值': f"{result['did_pvalue']:.4f}",
+                'P 值': f"{result['did_pvalue']:.4f}",
                 '显著性': '***' if result['did_pvalue'] < 0.01 else '**' if result['did_pvalue'] < 0.05 else '*' if result['did_pvalue'] < 0.1 else '',
                 '样本量': result['n_obs'],
-                '平行趋势检验P值': f"{result['pre_trend_p']:.4f}" if result['pre_trend_p'] else 'N/A'
+                '平行趋势检验 P 值': f"{result['pre_trend_p']:.4f}" if result['pre_trend_p'] else 'N/A'
             }
         
         elif method == 'iv':
             formatted['工具变量法'] = {
-                'IV系数': f"{result['iv_coef']:.4f}",
+                'IV 系数': f"{result['iv_coef']:.4f}",
                 '标准误': f"({result['iv_se']:.4f})",
-                'P值': f"{result['iv_pvalue']:.4f}",
+                'P 值': f"{result['iv_pvalue']:.4f}",
                 '显著性': '***' if result['iv_pvalue'] < 0.01 else '**' if result['iv_pvalue'] < 0.05 else '*' if result['iv_pvalue'] < 0.1 else '',
-                '第一阶段F统计量': f"{result['f_stat']:.2f}",
-                '弱IV检验P值': f"{result['f_pvalue']:.4f}",
+                '第一阶段 F 统计量': f"{result['f_stat']:.2f}",
+                '弱 IV 检验 P 值': f"{result['f_pvalue']:.4f}",
                 '样本量': result['n_obs']
             }
         
         elif method == 'psm_att':
             formatted['PSM_ATT'] = {
-                '简单ATT': f"{result['simple_att']:.4f}",
-                '回归调整ATT': f"{result['reg_att']:.4f}",
+                '简单 ATT': f"{result['simple_att']:.4f}",
+                '回归调整 ATT': f"{result['reg_att']:.4f}",
                 '标准误': f"({result['reg_se']:.4f})",
-                'P值': f"{result['reg_pvalue']:.4f}",
+                'P 值': f"{result['reg_pvalue']:.4f}",
                 '显著性': '***' if result['reg_pvalue'] < 0.01 else '**' if result['reg_pvalue'] < 0.05 else '*' if result['reg_pvalue'] < 0.1 else '',
                 '匹配后样本量': result['n_obs']
             }
@@ -763,7 +763,7 @@ def format_econometric_results(results_dict):
             formatted['断点回归'] = {
                 'LATE': f"{result['late']:.4f}",
                 '标准误': f"({result['late_se']:.4f})",
-                'P值': f"{result['late_pvalue']:.4f}",
+                'P 值': f"{result['late_pvalue']:.4f}",
                 '显著性': '***' if result['late_pvalue'] < 0.01 else '**' if result['late_pvalue'] < 0.05 else '*' if result['late_pvalue'] < 0.1 else '',
                 '样本量': result['n_obs'],
                 '带宽': result['bandwidth'] or '全样本'
@@ -778,5 +778,4 @@ def format_econometric_results(results_dict):
                 '干预后时期数': len(effects_post)
             }
     
-    return formatted</content>
-<parameter name="filePath">D:\OpenCode-Projects\econometric-web\econometric_methods.py
+    return formatted
