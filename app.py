@@ -41,12 +41,6 @@ try:
     ECONOMETRIC_AVAILABLE = True
 except ImportError:
     ECONOMETRIC_AVAILABLE = False
-# 导入显著性优化模块
-try:
-    from optimization_analysis import significance_optimization, generate_optimization_report
-    OPTIMIZATION_AVAILABLE = True
-except ImportError:
-    OPTIMIZATION_AVAILABLE = False
 # ============================================================
 # 页面配置
 # ============================================================
