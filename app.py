@@ -672,6 +672,140 @@ with st.sidebar:
             st.warning("优化模块未找到，请确保 optimization_analysis.py 存在")
         else:
             target_p = 0.05
+
+        # 计量经济学方法选项
+        if ECONOMETRIC_AVAILABLE:
+            st.markdown("---")
+            st.markdown("### 🔬 计量经济学方法")
+            enable_econometric = st.checkbox(
+                "启用计量经济学方法",
+                value=False,
+                help="使用 DID、IV、PSM、RDD、SCM 等高级计量方法"
+            )
+            
+            if enable_econometric:
+                econometric_method = st.selectbox(
+                    "选择方法",
+                    options=[
+                        "自动检测",
+                        "经典 DID",
+                        "多期 DID",
+                        "事件研究 DID",
+                        "工具变量法 (IV)",
+                        "倾向得分匹配 (PSM)",
+                        "断点回归 (RDD)"
+                    ],
+                    index=0,
+                    help="选择要使用的计量经济学方法"
+                )
+                
+                # 根据方法显示额外参数
+                if econometric_method in ["经典 DID", "多期 DID", "事件研究 DID"]:
+                    time_var_did = st.selectbox(
+                        "时间变量",
+                        options=['无'] + all_vars,
+                        index=0,
+                        help="选择时间标识变量"
+                    )
+                    if identified.get('time_var') and identified['time_var'] in all_vars:
+                        time_var_did = identified['time_var']
+                
+                if econometric_method == "工具变量法 (IV)":
+                    iv_instruments = st.multiselect(
+                        "工具变量",
+                        options=available_controls,
+                        help="选择工具变量（至少 1 个）"
+                    )
+                    endog_var = st.selectbox(
+                        "内生变量",
+                        options=numeric_vars,
+                        index=numeric_vars.index(treat_var) if treat_var in numeric_vars else 0,
+                        help="选择可能存在内生性的变量"
+                    )
+                
+                if econometric_method == "断点回归 (RDD)":
+                    running_var = st.selectbox(
+                        "运行变量",
+                        options=numeric_vars,
+                        index=0,
+                        help="选择断点回归的运行变量"
+                    )
+                    cutoff = st.number_input(
+                        "断点值",
+                        value=0.0,
+                        help="设置断点的临界值"
+                    )
+        else:
+            st.warning("计量经济学模块未加载")
+            enable_econometric = False
+        
+
+        # 计量经济学方法选项
+        if ECONOMETRIC_AVAILABLE:
+            st.markdown("---")
+            st.markdown("### 计量经济学方法")
+            enable_econometric = st.checkbox(
+                "启用计量经济学方法",
+                value=False,
+                help="使用 DID、IV、PSM、RDD、SCM 等高级计量方法"
+            )
+            
+            if enable_econometric:
+                econometric_method = st.selectbox(
+                    "选择方法",
+                    options=[
+                        "自动检测",
+                        "经典 DID",
+                        "多期 DID",
+                        "事件研究 DID",
+                        "工具变量法 (IV)",
+                        "倾向得分匹配 (PSM)",
+                        "断点回归 (RDD)"
+                    ],
+                    index=0,
+                    help="选择要使用的计量经济学方法"
+                )
+                
+                # 根据方法显示额外参数
+                if econometric_method in ["经典 DID", "多期 DID", "事件研究 DID"]:
+                    time_var_did = st.selectbox(
+                        "时间变量",
+                        options=['无'] + all_vars,
+                        index=0,
+                        help="选择时间标识变量"
+                    )
+                    if identified.get('time_var') and identified['time_var'] in all_vars:
+                        time_var_did = identified['time_var']
+                
+                if econometric_method == "工具变量法 (IV)":
+                    iv_instruments = st.multiselect(
+                        "工具变量",
+                        options=available_controls,
+                        help="选择工具变量（至少 1 个）"
+                    )
+                    endog_var = st.selectbox(
+                        "内生变量",
+                        options=numeric_vars,
+                        index=numeric_vars.index(treat_var) if treat_var in numeric_vars else 0,
+                        help="选择可能存在内生性的变量"
+                    )
+                
+                if econometric_method == "断点回归 (RDD)":
+                    running_var = st.selectbox(
+                        "运行变量",
+                        options=numeric_vars,
+                        index=0,
+                        help="选择断点回归的运行变量"
+                    )
+                    cutoff = st.number_input(
+                        "断点值",
+                        value=0.0,
+                        help="设置断点的临界值"
+                    )
+        else:
+            st.warning("计量经济学模块未加载")
+            enable_econometric = False
+        
         # 分析按钮
         st.markdown("---")
         run_analysis = st.button("🚀 开始分析", type="primary", use_container_width=True)
@@ -813,6 +947,43 @@ else:
                             st.error(f"优化分析失败：{str(e)}")
                             st.session_state.optimization_results = None
                 
+                # 8. 计量经济学方法分析
+                if enable_econometric and ECONOMETRIC_AVAILABLE:
+                    with st.spinner("正在进行计量经济学分析..."):
+                        try:
+                            econ_results = {}
+                            
+                            if econometric_method == "经典 DID" or econometric_method == "自动检测":
+                                if 'year' in df.columns and identified.get('time_var'):
+                                    did_result = classic_did(df, dep_var, treat_var, 
+                                                           identified['time_var'], 
+                                                           df[identified['time_var']].median(),
+                                                           controls=control_vars)
+                                    econ_results['classic_did'] = did_result
+                            
+                            if econometric_method == "工具变量法 (IV)":
+                                if 'iv_instruments' in locals() and len(iv_instruments) > 0:
+                                    iv_result = instrumental_variables(df, dep_var, endog_var,
+                                                                      iv_instruments, control_vars)
+                                    econ_results['iv'] = iv_result
+                            
+                            if econometric_method == "倾向得分匹配 (PSM)":
+                                psm_result = propensity_score_matching(df, treat_var, control_vars[:5])
+                                psm_att = psm_att_estimation(psm_result['matched_data'], dep_var, treat_var, control_vars[:5])
+                                econ_results['psm_att'] = psm_att
+                            
+                            if econometric_method == "断点回归 (RDD)":
+                                if 'running_var' in locals():
+                                    rdd_result = regression_discontinuity_design(df, dep_var, running_var,
+                                                                              cutoff, controls=control_vars)
+                                    econ_results['rdd'] = rdd_result
+                            
+                            st.session_state.econometric_results = econ_results
+                            st.success("✅ 计量经济学分析完成！")
+                        except Exception as e:
+                            st.error(f"计量经济学分析失败：{str(e)}")
+                            st.session_state.econometric_results = None
+                
                 st.success("✅ 分析完成！")
                 st.success("✅ 分析完成！")
         
@@ -821,8 +992,25 @@ else:
         
         # 创建标签页
         # 创建标签页
-        if st.session_state.get('optimization_results') is not None:
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+        # 根据启用状态决定标签页数量
+        has_optimization = st.session_state.get('optimization_results') is not None
+        has_econometric = st.session_state.get('econometric_results') is not None
+        
+        if has_optimization and has_econometric:
+            tabs = st.tabs([
+                "📊 描述性统计", 
+                "📈 基准回归", 
+                "🔬 异质性分析", 
+                "🛡️ 稳健性检验",
+                "📐 固定效应",
+                "🔍 诊断检验",
+                "✨ 显著性优化",
+                "🔬 计量经济学",
+                "📥 报告下载"
+            ])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = tabs
+        elif has_optimization:
+            tabs = st.tabs([
                 "📊 描述性统计", 
                 "📈 基准回归", 
                 "🔬 异质性分析", 
@@ -832,6 +1020,30 @@ else:
                 "✨ 显著性优化",
                 "📥 报告下载"
             ])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = tabs
+        elif has_econometric:
+            tabs = st.tabs([
+                "📊 描述性统计", 
+                "📈 基准回归", 
+                "🔬 异质性分析", 
+                "🛡️ 稳健性检验",
+                "📐 固定效应",
+                "🔍 诊断检验",
+                "🔬 计量经济学",
+                "📥 报告下载"
+            ])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = tabs
+        else:
+            tabs = st.tabs([
+                "📊 描述性统计", 
+                "📈 基准回归", 
+                "🔬 异质性分析", 
+                "🛡️ 稳健性检验",
+                "📐 固定效应",
+                "🔍 诊断检验",
+                "📥 报告下载"
+            ])
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = tabs
         else:
             tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
                 "📊 描述性统计", 
@@ -1197,7 +1409,32 @@ else:
                 else:
                     st.warning("未找到优化结果")
         
-        # Tab 8: 报告下载（如果有优化结果）
+        # Tab 8: 计量经济学方法
+        if st.session_state.get('econometric_results') and ECONOMETRIC_AVAILABLE:
+            with tab8:
+                st.markdown("### 计量经济学方法结果")
+                
+                st.info("""
+                **支持的计量方法**：
+                
+                - **DID 方法**：经典 DID、多期 DID、事件研究、DDD
+                - **因果推断**：工具变量法 (IV)、倾向得分匹配 (PSM)
+                - **准实验设计**：断点回归 (RDD)、合成控制法 (SCM)
+                - **其他方法**：分位数回归、面板数据模型
+                """)
+                
+                econometric_results = st.session_state.econometric_results
+                formatted_results = format_econometric_results(econometric_results)
+                
+                if formatted_results:
+                    for method_name, results in formatted_results.items():
+                        with st.expander(f"📊 {method_name}", expanded=True):
+                            result_df = pd.DataFrame(list(results.items()), columns=['指标', '值'])
+                            st.dataframe(result_df, use_container_width=True, hide_index=True)
+                else:
+                    st.info("未检测到计量经济学方法结果")
+        
+        # Tab 9: 报告下载（如果有优化结果）
         if st.session_state.get('optimization_results') is not None:
             with tab8:
                 st.markdown("### 📥 分析报告下载")
