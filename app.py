@@ -1417,7 +1417,8 @@ else:
                     st.markdown("#### 数据下载")
                     
                     # 描述性统计
-                    desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')  # 将描述性统计结果转为 CSV 格式并编码为 UTF-8 带 BOM 格式
+                    if 'descriptive' in results:
+                        desc_csv = results['descriptive'].T.to_csv().encode('utf-8-sig')  # 将描述性统计结果转为 CSV 格式并编码为 UTF-8 带 BOM 格式
                     st.download_button(
                         label="📊 下载描述性统计 (CSV)",
                         data=desc_csv,
