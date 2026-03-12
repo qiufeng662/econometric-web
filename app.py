@@ -30,6 +30,23 @@ try:
 except ImportError:
     OPTIMIZATION_AVAILABLE = False
 
+# 导入计量经济学方法模块
+try:
+    from econometric_methods import (
+        classic_did, multiple_period_did, event_study_did, difference_in_difference_in_differences,
+        instrumental_variables, propensity_score_matching, psm_att_estimation,
+        regression_discontinuity_design, synthetic_control_method,
+        quantile_regression, panel_data_models, format_econometric_results
+    )
+    ECONOMETRIC_AVAILABLE = True
+except ImportError:
+    ECONOMETRIC_AVAILABLE = False
+# 导入显著性优化模块
+try:
+    from optimization_analysis import significance_optimization, generate_optimization_report
+    OPTIMIZATION_AVAILABLE = True
+except ImportError:
+    OPTIMIZATION_AVAILABLE = False
 # ============================================================
 # 页面配置
 # ============================================================
